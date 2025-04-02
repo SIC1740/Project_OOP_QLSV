@@ -1,0 +1,132 @@
+
+✅ Hướng dẫn chạy MySQL trên Docker
+🔧 Yêu cầu:
+Đã cài đặt Docker (nếu chưa có mình sẽ hướng dẫn ở cuối).
+
+
+Terminal / CMD / PowerShell.
+
+
+
+🪜 Bước 1: Kéo image MySQL từ Docker Hub
+docker pull mysql:8.0
+
+Bạn cũng có thể dùng mysql:latest nếu muốn bản mới nhất.
+
+🪜 Bước 2: Chạy container MySQL
+docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:8.0
+
+Giải thích:
+--name mysql-container: Tên container.
+
+
+-e MYSQL_ROOT_PASSWORD=123456: đặt mật khẩu cho user root.
+
+
+-p 3306:3306: ánh xạ port MySQL ra ngoài máy (để DataGrip/IntelliJ kết nối được).
+
+
+-d: chạy ngầm (detached).
+
+
+mysql:8.0: tên image đã pull ở bước trên.
+
+
+⚠️ Bạn có thể thay mật khẩu theo ý muốn.
+
+🧪 Bước 3: Kiểm tra container
+docker ps
+
+Nếu thấy container mysql-container đang chạy, bạn đã thành công!
+
+🧠 Bước 4: Kết nối từ DataGrip hoặc IntelliJ
+Trong DataGrip hoặc IntelliJ:
+Host: localhost
+
+
+Port: 3306
+
+
+User: root
+
+
+Password: 123456 (hoặc mật khẩu bạn đã đặt)
+
+
+DB name: có thể tạo sau trong giao diện DataGrip hoặc dùng lệnh SQL
+
+
+
+🛑 Tắt / Khởi động lại container MySQL
+Tắt:
+
+
+docker stop mysql-container
+
+Mở lại:
+
+
+docker start mysql-container
+
+
+🪜 Bước 1: Tạo kết nối đến MySQL Server
+Mở DataGrip.
+
+
+Ở góc trái, nhấn dấu + → chọn Data Source > MySQL.
+
+
+Nhập thông tin kết nối:
+
+
+Host: localhost (hoặc IP khác nếu dùng server)
+
+
+Port: 3306
+
+
+User: root (hoặc user khác)
+
+
+Password: nhập rồi nhấn "Save"
+
+
+Nhấn Test Connection → nếu thành công, nhấn OK.
+
+
+Nếu DataGrip yêu cầu tải driver MySQL JDBC thì cứ nhấn Download.
+
+//////////////////////////////////
+
+StudentManagement/
+│
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── student/
+│       │       ├── Main.java
+│       │
+│       │       ├── model/                ← Các lớp dữ liệu (Student, Course...)
+│       │       │   └── Student.java
+│       │
+│       │       ├── dao/                  ← Lớp truy cập dữ liệu (MySQL)
+│       │       │   ├── StudentDAO.java
+│       │       │   └── DBConnection.java
+│       │
+│       │       ├── service/              ← Xử lý logic nghiệp vụ
+│       │       │   └── StudentService.java
+│       │
+│       │       └── ui/                   ← Giao diện console
+│       │           └── ConsoleUI.java
+│       │
+│       └── resources/
+│           └── db.properties             ← File cấu hình kết nối DB
+│
+├── lib/                                  ← Nếu không dùng Maven, để JDBC driver tại đây
+│   └── mysql-connector-java-8.0.xx.jar
+│
+└── README.md                             ← Ghi chú dự án
+
+
+///////////////
+Dùng Maven để kết nối MySQL với java
