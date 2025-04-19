@@ -98,35 +98,56 @@ Nếu DataGrip yêu cầu tải driver MySQL JDBC thì cứ nhấn Download.
 
 //////////////////////////////////
 
-StudentManagement/
-│
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── student/
-│       │       ├── Main.java
-│       │
-│       │       ├── model/                ← Các lớp dữ liệu (Student, Course...)
-│       │       │   └── Student.java
-│       │
-│       │       ├── dao/                  ← Lớp truy cập dữ liệu (MySQL)
-│       │       │   ├── StudentDAO.java
-│       │       │   └── DBConnection.java
-│       │
-│       │       ├── service/              ← Xử lý logic nghiệp vụ
-│       │       │   └── StudentService.java
-│       │
-│       │       └── ui/                   ← Giao diện console
-│       │           └── ConsoleUI.java
-│       │
-│       └── resources/
-│           └── db.properties             ← File cấu hình kết nối DB
-│
-├── lib/                                  ← Nếu không dùng Maven, để JDBC driver tại đây
-│   └── mysql-connector-java-8.0.xx.jar
-│
-└── README.md                             ← Ghi chú dự án
-
-
-///////////////
-Dùng Maven để kết nối MySQL với java
+Project_OOP_QLSV/
+ ├─ pom.xml                  # Maven build (hoặc build.gradle nếu bạn thích Gradle)
+ └─ src/
+     ├─ main/
+     │   ├─ java/
+     │   │   └─ com/
+     │   │       └─ myuniv/
+     │   │           └─ sm/          # (sm = student‑manager)
+     │   │               ├─ Main.java            # Điểm khởi chạy duy nhất
+     │   │               │
+     │   │               ├─ model/               # POJO, DTO
+     │   │               │   ├─ Student.java
+     │   │               │   ├─ Course.java
+     │   │               │   └─ …
+     │   │               │
+     │   │               ├─ view/                # Màn hình Swing
+     │   │               │   ├─ common/          # Thành phần tái sử dụng (ButtonStyled,…)
+     │   │               │   ├─ student/
+     │   │               │   │   ├─ StudentPanel.java
+     │   │               │   │   └─ StudentDialog.java
+     │   │               │   └─ …
+     │   │               │
+     │   │               ├─ controller/          # Lắng nghe sự kiện UI
+     │   │               │   ├─ StudentController.java
+     │   │               │   └─ …
+     │   │               │
+     │   │               ├─ dao/                 # Giao tiếp DB (JDBC, JPA…)
+     │   │               │   ├─ StudentDao.java
+     │   │               │   ├─ impl/
+     │   │               │   │   └─ StudentDaoJdbc.java
+     │   │               │   └─ util/
+     │   │               │       └─ DBConnection.java
+     │   │               │
+     │   │               ├─ service/             # Business logic độc lập UI
+     │   │               │   ├─ StudentService.java
+     │   │               │   └─ impl/
+     │   │               │       └─ StudentServiceImpl.java
+     │   │               │
+     │   │               ├─ util/                # Hàm tiện ích chung (DateUtils, Validator…)
+     │   │               └─ constant/            # Hằng số, thông điệp, query SQL tĩnh
+     │   │
+     │   └─ resources/    # File ngoài code
+     │       ├─ icons/
+     │       ├─ i18n/
+     │       │   └─ messages_vi.properties
+     │       └─ db/
+     │           └─ schema.sql
+     │
+     └─ test/             # Unit + integration test
+         └─ java/
+             └─ com.myuniv.sm/
+                 └─ service/
+                     └─ StudentServiceTest.java
