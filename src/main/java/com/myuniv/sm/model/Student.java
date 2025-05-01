@@ -3,28 +3,33 @@ package com.myuniv.sm.model;
 import java.time.LocalDate;
 
 public class Student {
+    private int STT;
     private String msv;
     private String hoTen;
-    private String gioiTinh;
     private LocalDate ngaySinh;
     private String email;
     private String soDienThoai;
-    private String diaChi;
     private String maLop;
     
     public Student() {
     }
     
-    public Student(String msv, String hoTen, String gioiTinh, LocalDate ngaySinh, 
-                  String email, String soDienThoai, String diaChi, String maLop) {
+    public Student(String msv, String hoTen, LocalDate ngaySinh, 
+                  String email, String soDienThoai, String maLop) {
         this.msv = msv;
         this.hoTen = hoTen;
-        this.gioiTinh = gioiTinh;
         this.ngaySinh = ngaySinh;
         this.email = email;
         this.soDienThoai = soDienThoai;
-        this.diaChi = diaChi;
         this.maLop = maLop;
+    }
+    
+    public int getSTT() {
+        return STT;
+    }
+    
+    public void setSTT(int STT) {
+        this.STT = STT;
     }
     
     public String getMsv() {
@@ -41,14 +46,6 @@ public class Student {
     
     public void setHoTen(String hoTen) {
         this.hoTen = hoTen;
-    }
-    
-    public String getGioiTinh() {
-        return gioiTinh;
-    }
-    
-    public void setGioiTinh(String gioiTinh) {
-        this.gioiTinh = gioiTinh;
     }
     
     public LocalDate getNgaySinh() {
@@ -75,14 +72,6 @@ public class Student {
         this.soDienThoai = soDienThoai;
     }
     
-    public String getDiaChi() {
-        return diaChi;
-    }
-    
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
-    }
-    
     public String getMaLop() {
         return maLop;
     }
@@ -91,13 +80,27 @@ public class Student {
         this.maLop = maLop;
     }
     
+    // For backwards compatibility with any existing code
+    public String getGioiTinh() {
+        return null;
+    }
+    
+    public String getDiaChi() {
+        return null;
+    }
+    
+    public String getTenLop() {
+        return null;
+    }
+    
     @Override
     public String toString() {
         return "Student{" +
                 "msv='" + msv + '\'' +
                 ", hoTen='" + hoTen + '\'' +
-                ", gioiTinh='" + gioiTinh + '\'' +
                 ", ngaySinh=" + ngaySinh +
+                ", email='" + email + '\'' +
+                ", soDienThoai='" + soDienThoai + '\'' +
                 ", maLop='" + maLop + '\'' +
                 '}';
     }

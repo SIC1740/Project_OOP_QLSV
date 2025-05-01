@@ -5,6 +5,8 @@ import com.myuniv.sm.service.AuthenticationService;
 import com.myuniv.sm.service.AuthException;
 import com.myuniv.sm.dao.impl.UserDaoJdbc;
 import com.myuniv.sm.view.admin.AdminFrame;
+import com.myuniv.sm.view.teacher.TeacherFrame;
+import com.myuniv.sm.view.student.StudentFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,8 +72,8 @@ public class LoginFrame extends JFrame {
                 dispose();
                 switch (user.getRole()) {
                     case "admin"     -> new AdminFrame(user).setVisible(true);
-//                    case "giangvien" -> new TeacherFrame(user).setVisible(true);
-//                    case "sinhvien"  -> new StudentFrame(user).setVisible(true);
+                    case "giangvien" -> new TeacherFrame(user).setVisible(true);
+                    case "sinhvien"  -> new StudentFrame(user).setVisible(true);
                     default -> JOptionPane.showMessageDialog(
                             null, "Vai trò không hợp lệ: " + user.getRole());
                 }

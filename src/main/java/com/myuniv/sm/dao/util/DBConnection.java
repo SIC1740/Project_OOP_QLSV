@@ -1,57 +1,80 @@
 package com.myuniv.sm.dao.util;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Properties;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Utility class for database connections
+ */
 public class DBConnection {
-
-    private static final Properties props = new Properties();
-
+    private static final Logger logger = Logger.getLogger(DBConnection.class.getName());
+    
+    // Database connection parameters - cập nhật phù hợp với cấu hình MySQL của bạn
+    private static String dbUrl = "jdbc:mysql://localhost:3306/DB_QLSV";
+    private static String dbUser = "root";
+    private static String dbPassword = "123456";
+    
     static {
-        try (InputStream in = DBConnection.class
-                .getClassLoader()
-                .getResourceAsStream("db.properties")) {
-            if (in == null) {
-                throw new RuntimeException("Không tìm thấy file db.properties trong classpath");
-            }
-            props.load(in);
-            // Đăng ký driver (MySQL 8 trở lên tự động, nhưng gọi cho chắc)
-            Class.forName(props.getProperty("db.driver"));
-        } catch (Exception e) {
-            throw new ExceptionInInitializerError("Lỗi khi load cấu hình DB: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Trả về Connection, ném RuntimeException nếu không connect được
-     */
-    public static Connection getConnection() {
         try {
-            String url      = props.getProperty("db.url");
-            String user     = props.getProperty("db.username");
-            String password = props.getProperty("db.password");
-
-            Connection conn = DriverManager.getConnection(url, user, password);
-            return conn;
-        } catch (Exception ex) {
-            throw new RuntimeException("Không thể kết nối tới DB: " + ex.getMessage(), ex);
+            // Load JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            logger.info("MySQL JDBC Driver loaded successfully");
+            
+            // Attempt connection when class is loaded to fail fast
+            try (Connection testConn = getConnection()) {
+                logger.info("Kết nối thành công đến CSDL: " + dbUrl);
+            }
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Không tìm thấy MySQL JDBC Driver!", e);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Không thể kết nối đến CSDL: " + e.getMessage(), e);
         }
     }
-
+    
     /**
-     * Main test nhanh kết nối
+     * Get a database connection
+     * @return A JDBC connection
+     * @throws SQLException if connection fails
      */
-    public static void main(String[] args) {
-        System.out.println("=== Kiểm tra kết nối DB ===");
-        try (Connection conn = getConnection()) {
-            String user = conn.getMetaData().getUserName();
-            String url  = conn.getMetaData().getURL();
-            System.out.printf("✅ Kết nối thành công!%n - URL  : %s%n - User : %s%n", url, user);
-        } catch (Exception e) {
-            System.err.println("❌ Kết nối thất bại: " + e.getMessage());
-            e.printStackTrace();
+    public static Connection getConnection() throws SQLException {
+        try {
+            return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Lỗi kết nối CSDL: " + e.getMessage(), e);
+            throw e;
         }
     }
+    
+    /**
+     * Configure database connection parameters
+     * @param url Database URL
+     * @param user Database username
+     * @param password Database password
+     */
+    public static void configure(String url, String user, String password) {
+        dbUrl = url;
+        dbUser = user;
+        dbPassword = password;
+        logger.info("Đã cấu hình lại kết nối CSDL: " + url);
+    }
+    
+    /**
+     * Test database connection
+     * @return true if connection is successful
+     */
+    public static boolean testConnection() {
+        try (Connection conn = getConnection()) {
+            return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Test kết nối CSDL thất bại: " + e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    // Private constructor to prevent instantiation
+    private DBConnection() {}
 }
+

@@ -15,6 +15,7 @@ public class LecturerDaoJdbc implements LecturerDao {
     private static final String INSERT = "INSERT INTO GiangVien (ma_giangvien, ho_ten, ngay_sinh, email, so_dien_thoai, hoc_vi) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String UPDATE = "UPDATE GiangVien SET ho_ten = ?, ngay_sinh = ?, email = ?, so_dien_thoai = ?, hoc_vi = ? WHERE ma_giangvien = ?";
     private static final String DELETE = "DELETE FROM GiangVien WHERE ma_giangvien = ?";
+    private static final String SELECT_BY_DEPARTMENT = "SELECT * FROM GiangVien WHERE hoc_vi = ?";
 
     @Override
     public List<Lecturer> findAll() {
@@ -98,6 +99,33 @@ public class LecturerDaoJdbc implements LecturerDao {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    @Override
+    public List<Lecturer> findByDepartment(String department) {
+        List<Lecturer> lecturers = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_BY_DEPARTMENT)) {
+            
+            ps.setString(1, department);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lecturers.add(extractLecturerFromResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lecturers;
+    }
+    
+    @Override
+    public boolean save(Lecturer lecturer) {
+        if (findById(lecturer.getMaGiangVien()) == null) {
+            return add(lecturer);
+        } else {
+            return update(lecturer);
         }
     }
 
