@@ -55,6 +55,7 @@ public class AdminFrame extends JFrame {
         tabbedPane1.addTab("Giảng Viên", new LecturerPanel());
         tabbedPane1.addTab("Sinh Viên", new StudentPanel());
         tabbedPane1.addTab("Classes", new ClassPanel());
+        tabbedPane1.addTab("Thống kê học phí", new FeeDebtPanel());
     }
     
     /**
