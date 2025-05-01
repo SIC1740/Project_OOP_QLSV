@@ -1,7 +1,5 @@
 
 ✅ Hướng dẫn chạy MySQL trên Docker
-🔧 Yêu cầu:
-Đã cài đặt Docker (nếu chưa có mình sẽ hướng dẫn ở cuối).
 
 
 Terminal / CMD / PowerShell.
@@ -11,33 +9,14 @@ Terminal / CMD / PowerShell.
 🪜 Bước 1: Kéo image MySQL từ Docker Hub
 docker pull mysql:8.0
 
-Bạn cũng có thể dùng mysql:latest nếu muốn bản mới nhất.
 
 🪜 Bước 2: Chạy container MySQL
 docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:8.0
 
-Giải thích:
---name mysql-container: Tên container.
-
-
--e MYSQL_ROOT_PASSWORD=123456: đặt mật khẩu cho user root.
-
-
--p 3306:3306: ánh xạ port MySQL ra ngoài máy (để DataGrip/IntelliJ kết nối được).
-
-
--d: chạy ngầm (detached).
-
-
-mysql:8.0: tên image đã pull ở bước trên.
-
-
-⚠️ Bạn có thể thay mật khẩu theo ý muốn.
 
 🧪 Bước 3: Kiểm tra container
 docker ps
 
-Nếu thấy container mysql-container đang chạy, bạn đã thành công!
 
 🧠 Bước 4: Kết nối từ DataGrip hoặc IntelliJ
 Trong DataGrip hoặc IntelliJ:
