@@ -67,15 +67,7 @@ public class StudentFrame extends JFrame {
     private void loadStudentInfo() {
         try {
             // Assume username is the student ID (msv)
-            studentInfo = studentService.getStudentByMsv(currentUser.getUsername());
-        } catch (ServiceException e) {
-            // Only show error dialog for real errors, not for missing student
-            if (!e.getMessage().contains("Không tìm thấy sinh viên")) {
-                JOptionPane.showMessageDialog(this,
-                    e.getMessage(),
-                    "Lỗi hệ thống",
-                    JOptionPane.ERROR_MESSAGE);
-            }
+            studentInfo = studentService.findByMsv(currentUser.getUsername());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                 "Lỗi không xác định khi tải thông tin sinh viên: " + e.getMessage(),

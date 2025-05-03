@@ -1,10 +1,14 @@
 package com.myuniv.sm.view.admin;
 
 import com.myuniv.sm.model.Student;
+import com.myuniv.sm.service.ServiceException;
 import com.myuniv.sm.service.StudentService;
+import com.myuniv.sm.view.admin.StudentDetailPanel;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Level;
@@ -13,7 +17,7 @@ import java.util.logging.Logger;
 public class StudentPanel extends JPanel {
     private static final Logger logger = Logger.getLogger(StudentPanel.class.getName());
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    
+
     private final DefaultTableModel model;
     private final JTable table;
     private final JButton btnAdd, btnEdit, btnDelete;
@@ -21,104 +25,89 @@ public class StudentPanel extends JPanel {
 
     public StudentPanel() {
         setLayout(new BorderLayout());
-        
-        // Initialize service
         studentService = new StudentService();
 
         model = new DefaultTableModel(
-                new Object[] {"MSV", "Họ Tên", "Ngày Sinh", "Email", "Số Điện Thoại", "Lớp"}, 0
-        ) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
+                new Object[]{"MSV","Họ Tên","Ngày Sinh","Email","SĐT","Lớp"}, 0
+        ) { @Override public boolean isCellEditable(int r,int c){return false;} };
         table = new JTable(model);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel btnPanel = new JPanel();
-        btnAdd    = new JButton("Thêm");
-        btnEdit   = new JButton("Sửa");
+        JPanel btns = new JPanel();
+        btnAdd = new JButton("Thêm");
+        btnEdit = new JButton("Sửa");
         btnDelete = new JButton("Xóa");
-        btnPanel.add(btnAdd);
-        btnPanel.add(btnEdit);
-        btnPanel.add(btnDelete);
-        add(btnPanel, BorderLayout.SOUTH);
+        btns.add(btnAdd);
+        btns.add(btnEdit);
+        btns.add(btnDelete);
+        add(btns, BorderLayout.SOUTH);
 
-        btnAdd.addActionListener(e -> onAdd());
-        btnEdit.addActionListener(e -> onEdit());
+        // Thêm/Sửa mở tab detail
+        btnAdd.addActionListener(e -> openDetailTab(null));
+        btnEdit.addActionListener(e -> {
+            int r = table.getSelectedRow();
+            if (r < 0) {
+                JOptionPane.showMessageDialog(this, "Chọn sinh viên để sửa");
+                return;
+            }
+            String msv = (String) model.getValueAt(r, 0);
+            Student s = studentService.findByMsv(msv);
+            if (s != null) openDetailTab(s);
+        });
+        // Xóa như cũ
         btnDelete.addActionListener(e -> onDelete());
 
         loadData();
     }
 
-    private void loadData() {
+    public void loadData() {
         model.setRowCount(0);
         try {
-            List<Student> students = studentService.findAll();
-            for (Student student : students) {
+            List<Student> list = studentService.findAll();
+            for (Student s : list) {
                 model.addRow(new Object[]{
-                    student.getMsv(),
-                    student.getHoTen(),
-                    student.getNgaySinh() != null ? DATE_FORMAT.format(student.getNgaySinh()) : "",
-                    student.getEmail(),
-                    student.getSoDienThoai(),
-                    student.getTenLop() != null ? student.getTenLop() : student.getMaLop()
+                        s.getMsv(), s.getHoTen(),
+                        s.getNgaySinh()!=null?DATE_FORMAT.format(s.getNgaySinh()):"",
+                        s.getEmail(), s.getSoDienThoai(), s.getMaLop()
                 });
             }
-            logger.info("Đã tải " + students.size() + " sinh viên vào bảng");
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Lỗi khi tải dữ liệu sinh viên", e);
-            JOptionPane.showMessageDialog(this, 
-                "Lỗi khi tải dữ liệu: " + e.getMessage(), 
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Lỗi tải sinh viên", ex);
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu: "+ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void onAdd() { 
-        // TODO: Implement add student functionality
-        JOptionPane.showMessageDialog(this, "Chức năng đang được phát triển");
-    }
-    
-    private void onEdit() { 
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn sinh viên để sửa", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    private void onDelete() {
+        int r = table.getSelectedRow();
+        if (r < 0) {
+            JOptionPane.showMessageDialog(this, "Chọn sinh viên để xóa");
             return;
         }
-        
-        String msv = (String) model.getValueAt(selectedRow, 0);
-        // TODO: Implement edit student functionality 
-        JOptionPane.showMessageDialog(this, "Chức năng đang được phát triển");
+        String msv = (String) model.getValueAt(r, 0);
+        int c = JOptionPane.showConfirmDialog(this, "Xác nhận xóa?", "Xóa", JOptionPane.YES_NO_OPTION);
+        if (c != JOptionPane.YES_OPTION) return;
+        try {
+            studentService.deleteStudent(msv);
+            loadData();
+            JOptionPane.showMessageDialog(this, "Xóa thành công");
+        } catch (ServiceException se) {
+            JOptionPane.showMessageDialog(this, se.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
-    
-    private void onDelete() { 
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn sinh viên để xóa", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            return;
+
+    /**
+     * Mở 1 tab chi tiết dùng StudentDetailPanel để Thêm/Sửa
+     */
+    private void openDetailTab(Student exist) {
+        Container c = this.getParent();
+        while (c != null && !(c instanceof JTabbedPane)) {
+            c = c.getParent();
         }
-        
-        String msv = (String) model.getValueAt(selectedRow, 0);
-        String name = (String) model.getValueAt(selectedRow, 1);
-        
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Bạn có chắc chắn muốn xóa sinh viên " + name + " (" + msv + ")?", 
-            "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            
-        if (confirm == JOptionPane.YES_OPTION) {
-            try {
-                boolean success = studentService.deleteStudent(msv);
-                if (success) {
-                    model.removeRow(selectedRow);
-                    JOptionPane.showMessageDialog(this, "Đã xóa sinh viên thành công");
-                    logger.info("Đã xóa sinh viên " + msv);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Không thể xóa sinh viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Lỗi khi xóa sinh viên " + msv, e);
-                JOptionPane.showMessageDialog(this, 
-                    "Lỗi khi xóa sinh viên: " + e.getMessage(), 
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+        if (!(c instanceof JTabbedPane)) return;
+        JTabbedPane tabs = (JTabbedPane) c;
+        String title = exist == null ? "Thêm Sinh viên" : "Sửa Sinh viên " + exist.getMsv();
+        StudentDetailPanel detail = new StudentDetailPanel(exist);
+        tabs.addTab(title, detail);
+        tabs.setSelectedComponent(detail);
     }
 }

@@ -41,4 +41,7 @@ public interface StudentDao {
      * @return true if successful, false otherwise
      */
     boolean delete(String msv);
+    boolean create(Student s);
+    boolean update(Student s);
+    boolean delete(int stt);
 } 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$USER_HOME$/Downloads/DB_QLSV.sql" dialect="MySQL" />
+    <file url="file://$USER_HOME$/Downloads/DiemTB (1).sql" dialect="MySQL" />
+    <file url="file://$USER_HOME$/Downloads/insert_diemmon (1).sql" dialect="MySQL" />
+    <file url="file://$USER_HOME$/Downloads/insert_diemmon_full.sql" dialect="MySQL" />
+  </component>
+</project>

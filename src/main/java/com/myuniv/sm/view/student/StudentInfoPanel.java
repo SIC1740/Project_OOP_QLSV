@@ -40,7 +40,7 @@ public class StudentInfoPanel extends JPanel {
      */
     public StudentInfoPanel(String studentId) throws ServiceException {
         StudentService service = new StudentService();
-        this.student = service.getStudentByMsv(studentId);
+        this.student = service.findByMsv(studentId);
         initUI();
     }
     

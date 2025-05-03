@@ -1,12 +1,12 @@
+// File: src/main/java/com/myuniv/sm/service/StudentService.java
 package com.myuniv.sm.service;
 
-import com.myuniv.sm.model.Student;
 import com.myuniv.sm.dao.StudentDao;
 import com.myuniv.sm.dao.impl.StudentDaoJdbc;
+import com.myuniv.sm.model.Student;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,14 +16,14 @@ import java.util.logging.Logger;
 public class StudentService {
     private final StudentDao studentDao;
     private static final Logger logger = Logger.getLogger(StudentService.class.getName());
-    
+
     /**
      * Default constructor uses JDBC implementation of StudentDao
      */
     public StudentService() {
         this.studentDao = new StudentDaoJdbc();
     }
-    
+
     /**
      * Constructor with dependency injection for testing
      * @param studentDao The StudentDao implementation to use
@@ -31,7 +31,7 @@ public class StudentService {
     public StudentService(StudentDao studentDao) {
         this.studentDao = studentDao;
     }
-    
+
     /**
      * Find a student by their student ID (MSV)
      * @param msv The student ID to look up
@@ -45,35 +45,7 @@ public class StudentService {
             return null;
         }
     }
-    
-    /**
-     * Get a student by their student ID (MSV) - alias for findByMsv for consistency
-     * with other service classes
-     * @param msv The student ID to look up
-     * @return The student if found, null otherwise
-     * @throws ServiceException if an error occurs
-     */
-    public Student getStudentByMsv(String msv) throws ServiceException {
-        try {
-            Student student = studentDao.findByMsv(msv);
-            if (student == null) {
-                if (msv.equals("admin") || msv.equals("giangvien")) {
-                    throw new ServiceException("Tài khoản này không có quyền truy cập vào giao diện sinh viên");
-                }
 
-                logger.log(Level.WARNING, "Không tìm thấy sinh viên " + msv + " trong database!");
-                throw new ServiceException("Không tìm thấy sinh viên với mã: " + msv);
-            }
-            return student;
-        } catch (Exception e) {
-            if (e instanceof ServiceException) {
-                throw (ServiceException) e;
-            }
-            logger.log(Level.SEVERE, "Error getting student by MSV: " + msv, e);
-            throw new ServiceException("Lỗi hệ thống khi tìm kiếm sinh viên: " + e.getMessage());
-        }
-    }
-    
     /**
      * Get a list of all students
      * @return List of all students
@@ -86,7 +58,7 @@ public class StudentService {
             return new ArrayList<>();
         }
     }
-    
+
     /**
      * Find students by class ID
      * @param maLop The class ID to search for
@@ -100,7 +72,7 @@ public class StudentService {
             return new ArrayList<>();
         }
     }
-    
+
     /**
      * Save a student (create or update)
      * @param student The student to save
@@ -112,15 +84,12 @@ public class StudentService {
             if (student == null) {
                 throw new ServiceException("Không thể lưu thông tin sinh viên null");
             }
-            
             if (student.getMsv() == null || student.getMsv().isEmpty()) {
                 throw new ServiceException("Mã sinh viên không được để trống");
             }
-            
             if (student.getHoTen() == null || student.getHoTen().isEmpty()) {
                 throw new ServiceException("Họ tên sinh viên không được để trống");
             }
-            
             return studentDao.save(student);
         } catch (Exception e) {
             if (e instanceof ServiceException) {
@@ -130,9 +99,29 @@ public class StudentService {
             throw new ServiceException("Lỗi hệ thống khi lưu sinh viên: " + e.getMessage());
         }
     }
-    
+
     /**
-     * Delete a student
+     * Create a new student (alias for saveStudent)
+     * @param student The student to create
+     * @return true if successful
+     * @throws ServiceException if an error occurs
+     */
+    public boolean createStudent(Student student) throws ServiceException {
+        return saveStudent(student);
+    }
+
+    /**
+     * Update an existing student (alias for saveStudent)
+     * @param student The student to update
+     * @return true if successful
+     * @throws ServiceException if an error occurs
+     */
+    public boolean updateStudent(Student student) throws ServiceException {
+        return saveStudent(student);
+    }
+
+    /**
+     * Delete a student by MSV
      * @param msv The student ID to delete
      * @return true if successful, false otherwise
      * @throws ServiceException if an error occurs
@@ -142,8 +131,11 @@ public class StudentService {
             if (msv == null || msv.isEmpty()) {
                 throw new ServiceException("Mã sinh viên không được để trống");
             }
-            
-            return studentDao.delete(msv);
+            boolean ok = studentDao.delete(msv);
+            if (!ok) {
+                throw new ServiceException("Xóa không thành công hoặc không tìm thấy MSV: " + msv);
+            }
+            return true;
         } catch (Exception e) {
             if (e instanceof ServiceException) {
                 throw (ServiceException) e;
@@ -152,4 +144,4 @@ public class StudentService {
             throw new ServiceException("Lỗi hệ thống khi xóa sinh viên: " + e.getMessage());
         }
     }
-} 
+}
