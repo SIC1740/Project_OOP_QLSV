@@ -1,0 +1,4 @@
+[Thong bao diem] Mon: OOP - Diem: 9
+[Thong bao chuyen phong] Chuyen sang phong 303-NT
+[Thong bao diem] Mon: 1 - Diem: 9
+[Thong bao nghi hoc] Chieu nay nghi hoc nhe cac em
