@@ -94,23 +94,7 @@ CREATE TABLE GiangVien (
 -- Các bảng khác...
 ```
 
-3. Thêm dữ liệu mẫu:
 
-```sql
--- Thêm tài khoản admin
-INSERT INTO User (username, password_hash, role) VALUES 
-('admin', '$2a$10$WbHpOKQOJC6AqFmMl04n5.TxWx.yXfIPmjEf1kI6C3cJ90uLYA3hy', 'admin');
-
--- Thêm tài khoản giảng viên
-INSERT INTO User (username, password_hash, role) VALUES 
-('GV001', '$2a$10$WbHpOKQOJC6AqFmMl04n5.TxWx.yXfIPmjEf1kI6C3cJ90uLYA3hy', 'giangvien');
-
--- Thêm tài khoản sinh viên
-INSERT INTO User (username, password_hash, role) VALUES 
-('SV001', '$2a$10$WbHpOKQOJC6AqFmMl04n5.TxWx.yXfIPmjEf1kI6C3cJ90uLYA3hy', 'sinhvien');
-
--- Thêm dữ liệu khác...
-```
 
 ### Biên Dịch và Chạy Ứng Dụng
 
@@ -129,8 +113,8 @@ java -cp out com.myuniv.sm.Main
 ### Đăng Nhập Mẫu
 
 - Admin: username = `admin`, password = `admin`
-- Giảng viên: username = `GV001`, password = `password`
-- Sinh viên: username = `SV001`, password = `password`
+- Giảng viên: username = `GV001`, password = `123456`
+- Sinh viên: username = `B21DCVT378`, password = `123456`
 
 ## Phát Triển
 
@@ -143,8 +127,5 @@ java -cp out com.myuniv.sm.Main
 
 ## Tác Giả
 
-Phát triển bởi: Team OOP
+Phát triển bởi: Team OOP By Vũ Văn Sĩ
 
-## Giấy Phép
-
-Dự án này được phân phối theo giấy phép MIT.
