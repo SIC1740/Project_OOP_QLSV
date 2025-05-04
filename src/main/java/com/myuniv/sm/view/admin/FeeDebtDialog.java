@@ -141,11 +141,11 @@ public class FeeDebtDialog extends JDialog {
         if (!isNewDebt) {
             txtMsv.setText(feeDebt.getMsv());
             txtMsv.setEditable(false); // Don't allow changing MSV in edit mode
-            lblStudentName.setText(feeDebt.getStudentName());
+            lblStudentName.setText(feeDebt.getTenSinhVien());
             txtKhoanThu.setText(feeDebt.getKhoanThu());
             txtSoTien.setText(feeDebt.getSoTien().toString());
             txtHanThu.setText(feeDebt.getHanThu().format(DATE_FORMATTER));
-            cmbStatus.setSelectedItem(feeDebt.getStatus());
+            cmbStatus.setSelectedItem(feeDebt.getStatus().getValue());
             
             // Disable find button in edit mode
             btnFindStudent.setEnabled(false);
@@ -153,7 +153,7 @@ public class FeeDebtDialog extends JDialog {
             // Store student info for later use
             selectedStudent = new Student();
             selectedStudent.setMsv(feeDebt.getMsv());
-            selectedStudent.setHoTen(feeDebt.getStudentName());
+            selectedStudent.setHoTen(feeDebt.getTenSinhVien());
         }
         
         // Add action listeners

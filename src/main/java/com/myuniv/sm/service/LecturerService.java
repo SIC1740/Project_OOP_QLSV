@@ -21,8 +21,7 @@ public class LecturerService {
      * Default constructor that initializes with JDBC DAO implementation
      */
     public LecturerService() {
-        // For now, we'll use a simulated DAO implementation until the real one is created
-        this.lecturerDao = null; // new LecturerDaoJdbc();
+        this.lecturerDao = new LecturerDaoJdbc();
     }
     
     /**
@@ -36,29 +35,16 @@ public class LecturerService {
     /**
      * Find a lecturer by their ID
      * @param id The lecturer ID to look up
-     * @return The lecturer if found, null otherwise
+     * @return The lecturer if found
      * @throws ServiceException If there is an error retrieving the lecturer
      */
     public Lecturer getLecturerById(String id) throws ServiceException {
         try {
-            // If we have a DAO, use it
-            if (lecturerDao != null) {
-                Lecturer lecturer = lecturerDao.findById(id);
-                if (lecturer == null) {
-                    // If no lecturer found in database, try to create a mock
-                    if (id != null && !id.isEmpty() && (id.startsWith("GV") || id.matches("^[0-9]{3,4}$"))) {
-                        return createMockLecturer(id);
-                    }
-                    throw new ServiceException("Không tìm thấy giảng viên với mã: " + id);
-                }
-                return lecturer;
-            } else {
-                // Fallback to mock data if DAO is not available
-                if (id != null && !id.isEmpty()) {
-                    return createMockLecturer(id);
-                }
+            Lecturer lecturer = lecturerDao.findById(id);
+            if (lecturer == null) {
                 throw new ServiceException("Không tìm thấy giảng viên với mã: " + id);
             }
+            return lecturer;
         } catch (Exception e) {
             if (e instanceof ServiceException) {
                 throw (ServiceException) e;
@@ -71,19 +57,14 @@ public class LecturerService {
     /**
      * Get a list of all lecturers
      * @return List of all lecturers
+     * @throws ServiceException If there is an error retrieving lecturers
      */
-    public List<Lecturer> findAll() {
+    public List<Lecturer> findAll() throws ServiceException {
         try {
-            if (lecturerDao != null) {
-                return lecturerDao.findAll();
-            } else {
-                // Return mock data if DAO is not available
-                return createMockLecturerList();
-            }
+            return lecturerDao.findAll();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error finding all lecturers", e);
-            // Return mock data if there's an error
-            return createMockLecturerList();
+            throw new ServiceException("Lỗi khi lấy danh sách giảng viên: " + e.getMessage());
         }
     }
     
@@ -91,25 +72,14 @@ public class LecturerService {
      * Find lecturers by department
      * @param department The department to search for
      * @return List of lecturers in the specified department
+     * @throws ServiceException If there is an error retrieving lecturers
      */
-    public List<Lecturer> findByDepartment(String department) {
+    public List<Lecturer> findByDepartment(String department) throws ServiceException {
         try {
-            if (lecturerDao != null) {
-                return lecturerDao.findByDepartment(department);
-            } else {
-                // Return mock data if DAO is not available
-                if ("CNTT".equals(department)) {
-                    return createMockLecturerList();
-                }
-                return new ArrayList<>();
-            }
+            return lecturerDao.findByDepartment(department);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error finding lecturers by department: " + department, e);
-            // Return mock data if there's an error
-            if ("CNTT".equals(department)) {
-                return createMockLecturerList();
-            }
-            return new ArrayList<>();
+            throw new ServiceException("Lỗi khi tìm giảng viên theo bộ môn: " + e.getMessage());
         }
     }
     
@@ -133,12 +103,7 @@ public class LecturerService {
                 throw new ServiceException("Họ tên giảng viên không được để trống");
             }
             
-            if (lecturerDao != null) {
-                return lecturerDao.save(lecturer);
-            } else {
-                // Simulate successful save
-                return true;
-            }
+            return lecturerDao.save(lecturer);
         } catch (Exception e) {
             if (e instanceof ServiceException) {
                 throw (ServiceException) e;
@@ -160,12 +125,7 @@ public class LecturerService {
                 throw new ServiceException("Mã giảng viên không được để trống");
             }
             
-            if (lecturerDao != null) {
-                return lecturerDao.delete(id);
-            } else {
-                // Simulate successful delete
-                return true;
-            }
+            return lecturerDao.delete(id);
         } catch (Exception e) {
             if (e instanceof ServiceException) {
                 throw (ServiceException) e;
@@ -175,54 +135,89 @@ public class LecturerService {
         }
     }
     
-    // Helper methods to create mock data
-    
-    private Lecturer createMockLecturer(String id) {
-        Lecturer lecturer = new Lecturer();
-        lecturer.setMaGiangVien(id);
-        
-        // Create different mock data based on ID pattern
-        if (id.equals("GV001") || id.equals("1")) {
-            lecturer.setHoTen("TS. Nguyễn Văn Giảng");
-            lecturer.setNgaySinh(LocalDate.of(1980, 5, 15));
-            lecturer.setEmail("nvgiang@example.edu.vn");
-            lecturer.setSoDienThoai("0123456789");
-            lecturer.setHocVi("TS");
-        } else if (id.equals("GV002") || id.equals("2")) {
-            lecturer.setHoTen("PGS. Trần Thị Hướng");
-            lecturer.setNgaySinh(LocalDate.of(1975, 8, 20));
-            lecturer.setEmail("tthuong@example.edu.vn");
-            lecturer.setSoDienThoai("0123456788");
-            lecturer.setHocVi("PGS");
-        } else {
-            lecturer.setHoTen("ThS. " + (id.startsWith("GV") ? id.substring(2) : id));
-            lecturer.setNgaySinh(LocalDate.of(1985, 3, 10));
-            lecturer.setEmail("lecturer" + id + "@example.edu.vn");
-            lecturer.setSoDienThoai("01234" + id);
-            lecturer.setHocVi("ThS");
+    /**
+     * Add a new lecturer
+     * @param lecturer The lecturer to add
+     * @return true if successful, false otherwise 
+     * @throws ServiceException if an error occurs
+     */
+    public boolean addLecturer(Lecturer lecturer) throws ServiceException {
+        try {
+            if (lecturer == null) {
+                throw new ServiceException("Không thể thêm giảng viên null");
+            }
+            
+            validateLecturer(lecturer);
+            
+            return lecturerDao.add(lecturer);
+        } catch (Exception e) {
+            if (e instanceof ServiceException) {
+                throw (ServiceException) e;
+            }
+            logger.log(Level.SEVERE, "Error adding lecturer", e);
+            throw new ServiceException("Lỗi khi thêm giảng viên: " + e.getMessage());
         }
-        
-        return lecturer;
     }
     
-    private List<Lecturer> createMockLecturerList() {
-        List<Lecturer> lecturers = new ArrayList<>();
+    /**
+     * Update an existing lecturer
+     * @param lecturer The lecturer to update
+     * @return true if successful, false otherwise
+     * @throws ServiceException if an error occurs
+     */
+    public boolean updateLecturer(Lecturer lecturer) throws ServiceException {
+        try {
+            if (lecturer == null) {
+                throw new ServiceException("Không thể cập nhật giảng viên null");
+            }
+            
+            validateLecturer(lecturer);
+            
+            // Check if the lecturer exists
+            Lecturer existingLecturer = lecturerDao.findById(lecturer.getMaGiangVien());
+            if (existingLecturer == null) {
+                throw new ServiceException("Không tìm thấy giảng viên để cập nhật");
+            }
+            
+            return lecturerDao.update(lecturer);
+        } catch (Exception e) {
+            if (e instanceof ServiceException) {
+                throw (ServiceException) e;
+            }
+            logger.log(Level.SEVERE, "Error updating lecturer", e);
+            throw new ServiceException("Lỗi khi cập nhật giảng viên: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Validate lecturer data
+     * @param lecturer The lecturer to validate
+     * @throws ServiceException if validation fails
+     */
+    private void validateLecturer(Lecturer lecturer) throws ServiceException {
+        if (lecturer.getMaGiangVien() == null || lecturer.getMaGiangVien().isEmpty()) {
+            throw new ServiceException("Mã giảng viên không được để trống");
+        }
         
-        Lecturer l1 = createMockLecturer("GV001");
-        lecturers.add(l1);
+        if (lecturer.getHoTen() == null || lecturer.getHoTen().isEmpty()) {
+            throw new ServiceException("Họ tên giảng viên không được để trống");
+        }
         
-        Lecturer l2 = createMockLecturer("GV002");
-        lecturers.add(l2);
+        if (lecturer.getNgaySinh() == null) {
+            throw new ServiceException("Ngày sinh không được để trống");
+        }
         
-        Lecturer l3 = new Lecturer();
-        l3.setMaGiangVien("GV003");
-        l3.setHoTen("ThS. Lê Văn Dạy");
-        l3.setHocVi("ThS");
-        l3.setNgaySinh(LocalDate.of(1985, 3, 10));
-        l3.setEmail("lvday@example.edu.vn");
-        l3.setSoDienThoai("0123456787");
-        lecturers.add(l3);
+        if (lecturer.getEmail() == null || lecturer.getEmail().isEmpty()) {
+            throw new ServiceException("Email không được để trống");
+        }
         
-        return lecturers;
+        // Validate học vị is one of the enum values
+        String hocVi = lecturer.getHocVi();
+        if (hocVi != null && !hocVi.isEmpty() && 
+            !hocVi.equals("Ths") && !hocVi.equals("TS") && 
+            !hocVi.equals("PGS") && !hocVi.equals("GS") && 
+            !hocVi.equals("Khác")) {
+            throw new ServiceException("Học vị không hợp lệ. Giá trị hợp lệ: Ths, TS, PGS, GS, Khác");
+        }
     }
 } 

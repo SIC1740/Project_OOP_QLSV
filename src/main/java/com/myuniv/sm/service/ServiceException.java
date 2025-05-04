@@ -1,9 +1,9 @@
 package com.myuniv.sm.service;
 
 /**
- * Custom exception for service layer errors
+ * Custom exception for service layer
  */
-public class ServiceException extends Exception {
+public class ServiceException extends RuntimeException {
     
     /**
      * Constructs a new service exception with null as its detail message.

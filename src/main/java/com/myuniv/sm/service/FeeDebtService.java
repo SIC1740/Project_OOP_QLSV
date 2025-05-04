@@ -20,11 +20,11 @@ public class FeeDebtService {
     }
     
     public List<FeeDebt> findUnpaidFeeDebts() {
-        return feeDebtDao.findByStatus("chưa đóng");
+        return feeDebtDao.findByStatus(FeeDebt.Status.CHƯA_ĐÓNG);
     }
     
     public List<FeeDebt> findPaidFeeDebts() {
-        return feeDebtDao.findByStatus("đã đóng");
+        return feeDebtDao.findByStatus(FeeDebt.Status.ĐÃ_ĐÓNG);
     }
     
     public FeeDebt findFeeDebtById(int debtId) {
@@ -38,7 +38,7 @@ public class FeeDebtService {
         feeDebt.setKhoanThu(khoanThu);
         feeDebt.setSoTien(soTien);
         feeDebt.setHanThu(hanThu);
-        feeDebt.setStatus(status);
+        feeDebt.setStatus(FeeDebt.Status.fromString(status));
         
         return feeDebtDao.save(feeDebt);
     }
@@ -54,7 +54,7 @@ public class FeeDebtService {
         feeDebt.setKhoanThu(khoanThu);
         feeDebt.setSoTien(soTien);
         feeDebt.setHanThu(hanThu);
-        feeDebt.setStatus(status);
+        feeDebt.setStatus(FeeDebt.Status.fromString(status));
         
         return feeDebtDao.update(feeDebt);
     }
@@ -65,7 +65,7 @@ public class FeeDebtService {
             return false;
         }
         
-        feeDebt.setStatus("đã đóng");
+        feeDebt.setStatus(FeeDebt.Status.ĐÃ_ĐÓNG);
         return feeDebtDao.update(feeDebt);
     }
     
@@ -75,11 +75,19 @@ public class FeeDebtService {
             return false;
         }
         
-        feeDebt.setStatus("chưa đóng");
+        feeDebt.setStatus(FeeDebt.Status.CHƯA_ĐÓNG);
         return feeDebtDao.update(feeDebt);
     }
     
     public boolean deleteFeeDebt(int debtId) {
         return feeDebtDao.delete(debtId);
+    }
+    
+    public List<FeeDebt> findFeeDebtsByStudent(String msv) {
+        return feeDebtDao.findByStudent(msv);
+    }
+    
+    public boolean hasUnpaidFees(String msv) {
+        return feeDebtDao.hasUnpaidFees(msv);
     }
 } 

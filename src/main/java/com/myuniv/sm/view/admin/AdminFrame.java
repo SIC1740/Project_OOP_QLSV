@@ -2,6 +2,7 @@ package com.myuniv.sm.view.admin;
 
 import com.myuniv.sm.model.User;
 import com.myuniv.sm.view.LoginFrame;
+import com.myuniv.sm.view.admin.NotificationPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -54,8 +55,15 @@ public class AdminFrame extends JFrame {
         tabbedPane1.addTab("User Accounts", new UserAccountPanel());
         tabbedPane1.addTab("Giảng Viên", new LecturerPanel());
         tabbedPane1.addTab("Sinh Viên", new StudentPanel());
-        tabbedPane1.addTab("Classes", new ClassPanel());
+        tabbedPane1.addTab("Quản lý môn học", new SubjectPanel());
+        tabbedPane1.addTab("Quản lý lớp học", new AcademicClassPanel());
+        tabbedPane1.addTab("Quản lý điểm", new GradePanel(user.getUsername()));
+        tabbedPane1.addTab("Thông báo", new NotificationPanel());
+        tabbedPane1.addTab("Học bổng", new ScholarshipPanel());
         tabbedPane1.addTab("Thống kê học phí", new FeeDebtPanel());
+        tabbedPane1.addTab("Quản lý đồ án", new ProjectManagementPanel());
+        tabbedPane1.addTab("Đăng ký học lại", new RetakeRegistrationPanel());
+        tabbedPane1.addTab("Quản lý kỳ học", new AcademicTermPanel());
     }
     
     /**

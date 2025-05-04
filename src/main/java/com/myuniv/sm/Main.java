@@ -13,8 +13,7 @@ import java.util.logging.Logger;
 
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
-    
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         // Thiết lập cấu hình logging
         System.setProperty("java.util.logging.SimpleFormatter.format", 
                 "%1$tF %1$tT %4$s %2$s - %5$s%6$s%n");

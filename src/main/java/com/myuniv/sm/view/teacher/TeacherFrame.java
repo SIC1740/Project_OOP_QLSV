@@ -5,6 +5,8 @@ import com.myuniv.sm.model.User;
 import com.myuniv.sm.service.LecturerService;
 import com.myuniv.sm.service.ServiceException;
 import com.myuniv.sm.view.LoginFrame;
+import com.myuniv.sm.view.teacher.TeacherClassesPanel;
+import com.myuniv.sm.view.teacher.NotificationPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -345,10 +347,10 @@ public class TeacherFrame extends JFrame {
         panel.add(linksPanel);
         
         // Add teaching statistics card
-        JPanel statsPanel = createStatsPanel();
-        statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, statsPanel.getPreferredSize().height));
-        panel.add(Box.createVerticalStrut(15));
-        panel.add(statsPanel);
+//        JPanel statsPanel = createStatsPanel();
+//        statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, statsPanel.getPreferredSize().height));
+//        panel.add(Box.createVerticalStrut(15));
+//        panel.add(statsPanel);
         
         // Add a glue to push everything up
         panel.add(Box.createVerticalGlue());
@@ -356,39 +358,39 @@ public class TeacherFrame extends JFrame {
         return panel;
     }
     
-    private JPanel createStatsPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-        
-        // Stats header
-        JLabel headerLabel = new JLabel("Thống kê giảng dạy");
-        headerLabel.setFont(new Font(headerLabel.getFont().getName(), Font.BOLD, 14));
-        headerLabel.setForeground(PRIMARY_COLOR);
-        headerLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
-        headerLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(headerLabel);
-        
-        // Add spacing
-        panel.add(Box.createVerticalStrut(10));
-        
-        // Add stats in a grid
-        JPanel statsGrid = new JPanel(new GridLayout(3, 2, 10, 5));
-        statsGrid.setOpaque(false);
-        statsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        addStatItem(statsGrid, "Số lớp đang dạy:", "4");
-        addStatItem(statsGrid, "Tổng số sinh viên:", "120");
-        addStatItem(statsGrid, "Số môn phụ trách:", "3");
-        
-        panel.add(statsGrid);
-        
-        return panel;
-    }
+//    private JPanel createStatsPanel() {
+//        JPanel panel = new JPanel();
+//        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+//        panel.setBackground(Color.WHITE);
+//        panel.setBorder(BorderFactory.createCompoundBorder(
+//            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
+//            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+//        ));
+//
+//        // Stats header
+//        JLabel headerLabel = new JLabel("Thống kê giảng dạy");
+//        headerLabel.setFont(new Font(headerLabel.getFont().getName(), Font.BOLD, 14));
+//        headerLabel.setForeground(PRIMARY_COLOR);
+//        headerLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+//        headerLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+//        panel.add(headerLabel);
+//
+//        // Add spacing
+//        panel.add(Box.createVerticalStrut(10));
+//
+//        // Add stats in a grid
+//        JPanel statsGrid = new JPanel(new GridLayout(3, 2, 10, 5));
+//        statsGrid.setOpaque(false);
+//        statsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+//
+//        addStatItem(statsGrid, "Số lớp đang dạy:", "4");
+//        addStatItem(statsGrid, "Tổng số sinh viên:", "120");
+//        addStatItem(statsGrid, "Số môn phụ trách:", "3");
+//
+//        panel.add(statsGrid);
+//
+//        return panel;
+//    }
     
     private void addStatItem(JPanel panel, String label, String value) {
         JLabel titleLabel = new JLabel(label);
@@ -424,7 +426,7 @@ public class TeacherFrame extends JFrame {
         // Links
         addQuickLink(panel, "Lịch giảng dạy", e -> selectTab(1));
         addQuickLink(panel, "Lớp giảng dạy", e -> selectTab(2));
-        addQuickLink(panel, "Quản lý điểm số", e -> selectTab(3));
+//        addQuickLink(panel, "Quản lý điểm số", e -> selectTab(3));
         addQuickLink(panel, "Báo cáo thống kê", e -> selectTab(4));
         
         return panel;
@@ -505,10 +507,10 @@ public class TeacherFrame extends JFrame {
         
         // Add tabs with actual functionality - no icons
         tabbedPane.addTab("Thông tin chi tiết", new LecturerInfoPanel(lecturerInfo));
-        tabbedPane.addTab("Lịch giảng dạy", new TeachingSchedulePanel(currentUser.getUsername()));
-        tabbedPane.addTab("Lớp giảng dạy", createPlaceholderPanel("Danh sách lớp giảng dạy sẽ hiển thị ở đây"));
-        tabbedPane.addTab("Quản lý điểm", createPlaceholderPanel("Quản lý điểm số sẽ thực hiện ở đây"));
-        tabbedPane.addTab("Thống kê", createPlaceholderPanel("Thống kê sẽ hiển thị ở đây"));
+        // tabbedPane.addTab("Lịch giảng dạy", new TeachingSchedulePanel(currentUser.getUsername()));
+        tabbedPane.addTab("Lớp giảng dạy", new TeacherClassesPanel(currentUser.getUsername()));
+        tabbedPane.addTab("Thông báo lớp học", new NotificationPanel(currentUser.getUsername()));
+        tabbedPane.addTab("Quản lý điểm", createPlaceholderPanel("Quản lý điểm số được thực hiện từ mục Lớp giảng dạy"));
         
         return tabbedPane;
     }

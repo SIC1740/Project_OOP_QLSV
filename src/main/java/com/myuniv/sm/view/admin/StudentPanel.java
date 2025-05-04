@@ -2,9 +2,13 @@ package com.myuniv.sm.view.admin;
 
 import com.myuniv.sm.model.Student;
 import com.myuniv.sm.service.StudentService;
+import com.myuniv.sm.util.ExcelExporter;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Level;
@@ -16,8 +20,9 @@ public class StudentPanel extends JPanel {
     
     private final DefaultTableModel model;
     private final JTable table;
-    private final JButton btnAdd, btnEdit, btnDelete;
+    private final JButton btnAdd, btnEdit, btnDelete, btnExport;
     private final StudentService studentService;
+    private List<Student> currentStudents; // Store the current list of students
 
     public StudentPanel() {
         setLayout(new BorderLayout());
@@ -37,14 +42,17 @@ public class StudentPanel extends JPanel {
         btnAdd    = new JButton("Thêm");
         btnEdit   = new JButton("Sửa");
         btnDelete = new JButton("Xóa");
+        btnExport = new JButton("Xuất Excel");
         btnPanel.add(btnAdd);
         btnPanel.add(btnEdit);
         btnPanel.add(btnDelete);
+        btnPanel.add(btnExport);
         add(btnPanel, BorderLayout.SOUTH);
 
         btnAdd.addActionListener(e -> onAdd());
         btnEdit.addActionListener(e -> onEdit());
         btnDelete.addActionListener(e -> onDelete());
+        btnExport.addActionListener(e -> onExport());
 
         loadData();
     }
@@ -52,8 +60,8 @@ public class StudentPanel extends JPanel {
     private void loadData() {
         model.setRowCount(0);
         try {
-            List<Student> students = studentService.findAll();
-            for (Student student : students) {
+            currentStudents = studentService.findAll();
+            for (Student student : currentStudents) {
                 model.addRow(new Object[]{
                     student.getMsv(),
                     student.getHoTen(),
@@ -63,7 +71,7 @@ public class StudentPanel extends JPanel {
                     student.getTenLop() != null ? student.getTenLop() : student.getMaLop()
                 });
             }
-            logger.info("Đã tải " + students.size() + " sinh viên vào bảng");
+            logger.info("Đã tải " + currentStudents.size() + " sinh viên vào bảng");
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Lỗi khi tải dữ liệu sinh viên", e);
             JOptionPane.showMessageDialog(this, 
@@ -73,8 +81,15 @@ public class StudentPanel extends JPanel {
     }
 
     private void onAdd() { 
-        // TODO: Implement add student functionality
-        JOptionPane.showMessageDialog(this, "Chức năng đang được phát triển");
+        StudentDialog dialog = new StudentDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this), 
+            null
+        );
+        dialog.setVisible(true);
+        
+        if (dialog.isSaved()) {
+            loadData();
+        }
     }
     
     private void onEdit() { 
@@ -85,8 +100,30 @@ public class StudentPanel extends JPanel {
         }
         
         String msv = (String) model.getValueAt(selectedRow, 0);
-        // TODO: Implement edit student functionality 
-        JOptionPane.showMessageDialog(this, "Chức năng đang được phát triển");
+        try {
+            Student student = studentService.findByMsv(msv);
+            if (student == null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Không tìm thấy thông tin của sinh viên " + msv, 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            StudentDialog dialog = new StudentDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this), 
+                student
+            );
+            dialog.setVisible(true);
+            
+            if (dialog.isSaved()) {
+                loadData();
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Lỗi khi lấy thông tin sinh viên", e);
+            JOptionPane.showMessageDialog(this,
+                "Lỗi: " + e.getMessage(),
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void onDelete() { 
@@ -110,6 +147,7 @@ public class StudentPanel extends JPanel {
                     model.removeRow(selectedRow);
                     JOptionPane.showMessageDialog(this, "Đã xóa sinh viên thành công");
                     logger.info("Đã xóa sinh viên " + msv);
+                    loadData(); // Reload to ensure data consistency
                 } else {
                     JOptionPane.showMessageDialog(this, "Không thể xóa sinh viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
@@ -117,6 +155,67 @@ public class StudentPanel extends JPanel {
                 logger.log(Level.SEVERE, "Lỗi khi xóa sinh viên " + msv, e);
                 JOptionPane.showMessageDialog(this, 
                     "Lỗi khi xóa sinh viên: " + e.getMessage(), 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    private void onExport() {
+        if (currentStudents == null || currentStudents.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Không có dữ liệu sinh viên để xuất",
+                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        // Create a file chooser
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn vị trí lưu file");
+        
+        // Set default file name with current datetime
+        String defaultFileName = "DanhSachSinhVien_" + 
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
+                                ".xlsx";
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        
+        // Show save dialog
+        int userSelection = fileChooser.showSaveDialog(this);
+        
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            
+            // Ensure the file has .xlsx extension
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            
+            try {
+                ExcelExporter.exportStudentsToExcel(currentStudents, filePath);
+                JOptionPane.showMessageDialog(this, 
+                    "File đã được xuất thành công tại: " + filePath,
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                
+                // Ask if the user wants to open the file
+                int openFile = JOptionPane.showConfirmDialog(this,
+                    "Bạn có muốn mở file này không?",
+                    "Mở file", JOptionPane.YES_NO_OPTION);
+                    
+                if (openFile == JOptionPane.YES_OPTION) {
+                    try {
+                        Desktop.getDesktop().open(new File(filePath));
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Không thể mở file Excel", e);
+                        JOptionPane.showMessageDialog(this,
+                            "Không thể mở file Excel. Vui lòng mở thủ công.",
+                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+                
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Lỗi khi xuất dữ liệu sinh viên ra Excel", e);
+                JOptionPane.showMessageDialog(this, 
+                    "Lỗi khi xuất file: " + e.getMessage(),
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }

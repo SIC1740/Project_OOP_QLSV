@@ -122,8 +122,7 @@ Project_OOP_QLSV/
      │       ├─ icons/
      │       ├─ i18n/
      │       │   └─ messages_vi.properties
-     │       └─ db/
-     │           └─ schema.sql
+     │
      │
      └─ test/             # Unit + integration test
          └─ java/

@@ -3,6 +3,7 @@ package com.myuniv.sm.view.admin;
 import com.myuniv.sm.model.Class;
 import com.myuniv.sm.service.ClassService;
 import com.myuniv.sm.service.ServiceException;
+import java.util.Collections;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -70,10 +71,10 @@ public class ClassPanel extends JPanel {
 
     public void loadData() {
         model.setRowCount(0);
-        
+
         try {
-            List<Class> classes = classService.findAll();
-            
+            List<Class> classes = classService.getAllClasses();
+
             for (Class classObj : classes) {
                 model.addRow(new Object[] {
                     classObj.getMaLop(),
@@ -81,7 +82,7 @@ public class ClassPanel extends JPanel {
                     classObj.getStudentCount()
                 });
             }
-            
+
             if (classes.isEmpty()) {
                 logger.info("Không có dữ liệu lớp để hiển thị");
             } else {
@@ -118,7 +119,7 @@ public class ClassPanel extends JPanel {
 
         try {
             String maLop = model.getValueAt(selectedRow, 0).toString();
-            Class classObj = classService.getClassByMaLop(maLop);
+            Class classObj = classService.getClassById(maLop);
             
             ClassDialog dialog = new ClassDialog(
                 (Frame) SwingUtilities.getWindowAncestor(this), 

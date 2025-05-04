@@ -1,9 +1,13 @@
 package com.myuniv.sm.model;
 
 import java.time.LocalDate;
+import java.util.Date;
 
+/**
+ * Model class for SinhVien (Student) table
+ */
 public class Student {
-    private int STT;
+    private int stt;
     private String msv;
     private String hoTen;
     private LocalDate ngaySinh;
@@ -12,10 +16,12 @@ public class Student {
     private String maLop;
     
     public Student() {
+        // Default constructor
     }
     
-    public Student(String msv, String hoTen, LocalDate ngaySinh, 
+    public Student(int stt, String msv, String hoTen, LocalDate ngaySinh, 
                   String email, String soDienThoai, String maLop) {
+        this.stt = stt;
         this.msv = msv;
         this.hoTen = hoTen;
         this.ngaySinh = ngaySinh;
@@ -24,12 +30,12 @@ public class Student {
         this.maLop = maLop;
     }
     
-    public int getSTT() {
-        return STT;
+    public int getStt() {
+        return stt;
     }
     
-    public void setSTT(int STT) {
-        this.STT = STT;
+    public void setStt(int stt) {
+        this.stt = stt;
     }
     
     public String getMsv() {
@@ -95,13 +101,6 @@ public class Student {
     
     @Override
     public String toString() {
-        return "Student{" +
-                "msv='" + msv + '\'' +
-                ", hoTen='" + hoTen + '\'' +
-                ", ngaySinh=" + ngaySinh +
-                ", email='" + email + '\'' +
-                ", soDienThoai='" + soDienThoai + '\'' +
-                ", maLop='" + maLop + '\'' +
-                '}';
+        return msv + " - " + hoTen;
     }
 } 

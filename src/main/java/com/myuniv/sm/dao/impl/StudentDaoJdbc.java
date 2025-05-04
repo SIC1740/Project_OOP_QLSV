@@ -207,7 +207,7 @@ public class StudentDaoJdbc implements StudentDao {
         
         // Trường STT
         try {
-            student.setSTT(rs.getInt("STT"));
+            student.setStt(rs.getInt("STT"));
         } catch (SQLException e) {
             logger.fine("Không thể đọc trường STT: " + e.getMessage());
             // Bỏ qua nếu trường không tồn tại

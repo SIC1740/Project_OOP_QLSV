@@ -13,17 +13,25 @@ import java.util.List;
 public class FeeDebtDaoJdbc implements FeeDebtDao {
     private static final String SELECT_ALL =
             "SELECT fd.*, sv.ho_ten FROM FeeDebt fd " +
-            "JOIN SinhVien sv ON fd.msv = sv.msv " +
+            "LEFT JOIN SinhVien sv ON fd.msv = sv.msv " +
             "ORDER BY fd.han_thu DESC";
     private static final String SELECT_BY_STATUS =
             "SELECT fd.*, sv.ho_ten FROM FeeDebt fd " +
-            "JOIN SinhVien sv ON fd.msv = sv.msv " +
+            "LEFT JOIN SinhVien sv ON fd.msv = sv.msv " +
             "WHERE fd.status = ? " +
             "ORDER BY fd.han_thu DESC";
     private static final String SELECT_BY_ID =
             "SELECT fd.*, sv.ho_ten FROM FeeDebt fd " +
-            "JOIN SinhVien sv ON fd.msv = sv.msv " +
+            "LEFT JOIN SinhVien sv ON fd.msv = sv.msv " +
             "WHERE fd.debt_id = ?";
+    private static final String SELECT_BY_STUDENT =
+            "SELECT fd.*, sv.ho_ten FROM FeeDebt fd " +
+            "LEFT JOIN SinhVien sv ON fd.msv = sv.msv " +
+            "WHERE fd.msv = ? " +
+            "ORDER BY fd.han_thu DESC";
+    private static final String SELECT_UNPAID_BY_STUDENT =
+            "SELECT COUNT(*) FROM FeeDebt " +
+            "WHERE msv = ? AND status = 'chưa đóng'";
     private static final String INSERT =
             "INSERT INTO FeeDebt (msv, khoan_thu, so_tien, han_thu, status) " +
             "VALUES (?, ?, ?, ?, ?)";
@@ -52,11 +60,16 @@ public class FeeDebtDaoJdbc implements FeeDebtDao {
     }
 
     @Override
-    public List<FeeDebt> findByStatus(String status) {
+    public List<FeeDebt> findByStatus(FeeDebt.Status status) {
+        return findByStatus(status.getValue());
+    }
+
+    @Override
+    public List<FeeDebt> findByStatus(String statusStr) {
         List<FeeDebt> feeDebts = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(SELECT_BY_STATUS)) {
-            ps.setString(1, status);
+            ps.setString(1, statusStr);
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -91,14 +104,60 @@ public class FeeDebtDaoJdbc implements FeeDebtDao {
     }
 
     @Override
+    public List<FeeDebt> findByStudent(String msv) {
+        List<FeeDebt> feeDebts = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_BY_STUDENT)) {
+            ps.setString(1, msv);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    FeeDebt feeDebt = extractFromResultSet(rs);
+                    feeDebt.setStudentName(rs.getString("ho_ten"));
+                    feeDebts.add(feeDebt);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return feeDebts;
+    }
+    
+    @Override
+    public boolean hasUnpaidFees(String msv) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_UNPAID_BY_STUDENT)) {
+            ps.setString(1, msv);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public boolean save(FeeDebt feeDebt) {
+        if (feeDebt.getDebtId() > 0) {
+            return update(feeDebt);
+        } else {
+            return add(feeDebt);
+        }
+    }
+    
+    @Override
+    public boolean add(FeeDebt feeDebt) {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, feeDebt.getMsv());
             ps.setString(2, feeDebt.getKhoanThu());
             ps.setBigDecimal(3, feeDebt.getSoTien());
             ps.setDate(4, Date.valueOf(feeDebt.getHanThu()));
-            ps.setString(5, feeDebt.getStatus());
+            ps.setString(5, feeDebt.getStatus().getValue());
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -123,7 +182,7 @@ public class FeeDebtDaoJdbc implements FeeDebtDao {
             ps.setString(2, feeDebt.getKhoanThu());
             ps.setBigDecimal(3, feeDebt.getSoTien());
             ps.setDate(4, Date.valueOf(feeDebt.getHanThu()));
-            ps.setString(5, feeDebt.getStatus());
+            ps.setString(5, feeDebt.getStatus().getValue());
             ps.setInt(6, feeDebt.getDebtId());
             
             return ps.executeUpdate() > 0;
@@ -146,13 +205,13 @@ public class FeeDebtDaoJdbc implements FeeDebtDao {
     }
     
     private FeeDebt extractFromResultSet(ResultSet rs) throws SQLException {
-        return new FeeDebt(
-            rs.getInt("debt_id"),
-            rs.getString("msv"),
-            rs.getString("khoan_thu"),
-            rs.getBigDecimal("so_tien"),
-            rs.getDate("han_thu").toLocalDate(),
-            rs.getString("status")
-        );
+        FeeDebt feeDebt = new FeeDebt();
+        feeDebt.setDebtId(rs.getInt("debt_id"));
+        feeDebt.setMsv(rs.getString("msv"));
+        feeDebt.setKhoanThu(rs.getString("khoan_thu"));
+        feeDebt.setSoTien(rs.getBigDecimal("so_tien"));
+        feeDebt.setHanThu(rs.getDate("han_thu").toLocalDate());
+        feeDebt.setStatus(rs.getString("status"));
+        return feeDebt;
     }
 } 

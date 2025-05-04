@@ -5,6 +5,12 @@ import com.myuniv.sm.model.User;
 import com.myuniv.sm.service.StudentService;
 import com.myuniv.sm.service.ServiceException;
 import com.myuniv.sm.view.LoginFrame;
+import com.myuniv.sm.view.student.StudentGradesPanel;
+import com.myuniv.sm.view.student.StudentNotificationPanel;
+import com.myuniv.sm.view.student.StudentSchedulePanel;
+import com.myuniv.sm.view.student.StudentProjectPanel;
+import com.myuniv.sm.view.student.StudentRetakePanel;
+import com.myuniv.sm.view.student.StudentAcademicTermPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -375,6 +381,7 @@ public class StudentFrame extends JFrame {
         addQuickLink(panel, "Kết quả học tập", e -> selectTab(2));
         addQuickLink(panel, "Đăng ký học phần", e -> selectTab(3));
         addQuickLink(panel, "Thông tin học phí", e -> selectTab(4));
+        addQuickLink(panel, "Đăng ký đồ án", e -> selectTab(5));
         
         return panel;
     }
@@ -453,11 +460,14 @@ public class StudentFrame extends JFrame {
         });
         
         // Add tabs with actual functionality - no icons
-        tabbedPane.addTab("Thông tin chi tiết", new StudentInfoPanel(studentInfo));
-        tabbedPane.addTab("Lịch học", new StudentSchedulePanel(currentUser.getUsername()));
-        tabbedPane.addTab("Kết quả học tập", createPlaceholderPanel("Kết quả học tập sẽ hiển thị ở đây"));
-        tabbedPane.addTab("Đăng ký môn học", createPlaceholderPanel("Đăng ký môn học sẽ thực hiện ở đây"));
+        tabbedPane.addTab("Thông tin sinh viên", new StudentInfoPanel(studentInfo));
+        tabbedPane.addTab("Thời khóa biểu", new StudentSchedulePanel(currentUser.getUsername()));
+        tabbedPane.addTab("Kết quả học tập", new StudentGradesPanel(currentUser.getUsername()));
+        tabbedPane.addTab("Thông báo", new StudentNotificationPanel(currentUser.getUsername()));
         tabbedPane.addTab("Học phí", createPlaceholderPanel("Thông tin học phí sẽ hiển thị ở đây"));
+        tabbedPane.addTab("Đăng ký đồ án", new StudentProjectPanel(currentUser.getUsername()));
+        tabbedPane.addTab("Đăng ký học lại", new StudentRetakePanel(currentUser.getUsername()));
+        tabbedPane.addTab("Kỳ học và môn học", new StudentAcademicTermPanel(currentUser));
         
         return tabbedPane;
     }
